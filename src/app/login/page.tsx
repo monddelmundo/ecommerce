@@ -1,64 +1,73 @@
+// app/(auth)/login/page.tsx
 "use client";
+
 import { useState } from "react";
-import "../globals.css";
+import { Container, Typography, Paper } from "@mui/material";
+import BasicTextField from "@/components/Textfield";
+import Button from "@/components/Button";
+import { useDispatch } from "react-redux";
+import { setUser } from "../store/userSlice";
+import { useRouter } from "next/navigation";
 
-const LoginPage = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+export default function LoginPage() {
+  const [form, setForm] = useState({ email: "", password: "" });
+  const router = useRouter();
+  const dispatch = useDispatch();
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Replace this with your auth logic
-    console.log(`Email: ${email}, Password: ${password}`);
+    console.log("Login submitted:", form);
+    dispatch(
+      setUser({
+        emailAddress: "test@gmail.com",
+        firstName: "Harry",
+        lastName: "Potter",
+        profilePhoto: "",
+      })
+    );
+    router.push("/products");
+
+    // Add auth logic here
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-indigo-500 to-purple-600">
-      <form
-        onSubmit={handleLogin}
-        className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md"
-      >
-        <h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">
-          Login
-        </h2>
-
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-sm text-gray-700">
-            Email
-          </label>
-          <input
-            id="email"
+    <Container
+      maxWidth="sm"
+      className="flex items-center justify-center min-h-screen"
+    >
+      <Paper elevation={3} className="p-6 w-full">
+        <Typography variant="h5" className="text-[#071108] mb-4">
+          Login to Your Account
+        </Typography>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <BasicTextField
+            sx={{ marginTop: 2, marginBottom: 2 }}
+            label="Email"
+            name="email"
+            value={form.email}
+            handleChange={handleChange}
+            fullWidth
+            id="email-field"
+            required
             type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="mt-1 w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
           />
-        </div>
-
-        <div className="mb-6">
-          <label htmlFor="password" className="block text-sm text-gray-700">
-            Password
-          </label>
-          <input
-            id="password"
+          <BasicTextField
+            label="Password"
+            id="password-field"
+            sx={{ marginBottom: 2 }}
+            name="password"
+            value={form.password}
+            handleChange={handleChange}
+            fullWidth
+            required
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            className="mt-1 w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
           />
-        </div>
-
-        <button
-          type="submit"
-          className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition"
-        >
-          Sign In
-        </button>
-      </form>
-    </div>
+          <Button title="Login" type="submit" />
+        </form>
+      </Paper>
+    </Container>
   );
-};
-
-export default LoginPage;
+}

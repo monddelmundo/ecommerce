@@ -10,12 +10,15 @@ import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
 import ViewCartPopup from "./ViewCartPopup";
 import { RootState } from "@/app/store";
 import { Menu, MenuItem } from "@mui/material";
+import { useRouter } from "next/navigation";
 
 const Navbar: React.FC = () => {
   const [search, setSearch] = useState("");
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
   const dispatch = useDispatch();
   const cart = useSelector((state: RootState) => state.cart.items);
+  const userDetails = useSelector((state: RootState) => state.user);
   const handleSearchTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearch(e.target.value);
   };
@@ -72,21 +75,34 @@ const Navbar: React.FC = () => {
         </button>
         {/* User Avatar */}
         <div className="flex items-center gap-2">
-          <div onClick={handleClick}>
-            <PersonIcon className="text-[#C7DBE6] text-xl" />
-            <span className="text-sm text-[#C7DBE6]">Hi, Edmond</span>
-          </div>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={() => setAnchorEl(null)}
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            transformOrigin={{ vertical: "top", horizontal: "right" }}
-          >
-            <MenuItem onClick={handleClose}>Profile</MenuItem>
-            <MenuItem onClick={handleClose}>Orders</MenuItem>
-            <MenuItem onClick={handleClose}>Logout</MenuItem>
-          </Menu>
+          {userDetails.user ? (
+            <>
+              <div onClick={handleClick}>
+                <PersonIcon className="text-[#C7DBE6] text-xl" />
+                <span className="text-sm text-[#C7DBE6]">
+                  Hi, {userDetails.user?.firstName}
+                </span>
+              </div>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={() => setAnchorEl(null)}
+                anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+                transformOrigin={{ vertical: "top", horizontal: "right" }}
+              >
+                <MenuItem onClick={handleClose}>Profile</MenuItem>
+                <MenuItem onClick={handleClose}>Orders</MenuItem>
+                <MenuItem onClick={handleClose}>Logout</MenuItem>
+              </Menu>
+            </>
+          ) : (
+            <span
+              className="cursor-pointer text-sm text-[#C7DBE6]"
+              onClick={() => router.push("/login")}
+            >
+              Sign In
+            </span>
+          )}
         </div>
       </div>
     </nav>

@@ -1,13 +1,15 @@
 interface Props {
-  title: string;
-  onClick: () => void;
+  title?: string;
+  onClick?: () => void;
+  type?: "submit" | "reset" | "button" | undefined;
   className?: string;
 }
 
-const Button: React.FC<Props> = ({ onClick, title, className }) => {
+const Button: React.FC<Props> = ({ onClick, title, className, type }) => {
   return (
     <button
       onClick={onClick}
+      type={type}
       className={
         className
           ? className

@@ -34,7 +34,7 @@ export default function RootLayout({
         <ToastProvider>
           <ReactQueryProvider>
             <ReduxProvider>
-              <Navbar />
+              {/* <Navbar /> */}
               {children}
             </ReduxProvider>
           </ReactQueryProvider>

@@ -1,11 +1,15 @@
-import { TextField } from "@mui/material";
+import { SxProps, TextField, Theme } from "@mui/material";
 
 interface props {
   label: string;
-  placeholder: string;
+  placeholder?: string;
   id: string;
   value: string;
+  fullWidth?: boolean;
+  sx?: SxProps<Theme> | undefined;
+  name?: string;
   type?: string;
+  required?: boolean;
   className?: string;
   handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
@@ -14,19 +18,27 @@ const BasicTextField: React.FC<props> = ({
   label,
   placeholder,
   id,
+  sx,
   value,
+  fullWidth,
   type = "text",
+  name,
   className,
+  required,
   handleChange,
 }) => {
   return (
     <TextField
       size="small"
+      sx={sx}
       placeholder={placeholder}
       id={id}
       className={className}
       label={label}
       type={type}
+      name={name}
+      required={required}
+      fullWidth={fullWidth}
       value={value}
       onChange={handleChange}
     />

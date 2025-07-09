@@ -43,7 +43,7 @@ const Navbar: React.FC = () => {
     <nav className="bg-[#071108] shadow px-6 py-3 flex items-center justify-between">
       {isOpen && <ViewCartPopup onClose={() => setIsOpen(false)} />}
       {/* Logo */}
-      <div className="text-xl font-bold text-[#C7DBE6]">Reychelle's Store</div>
+      <div className="text-xl font-bold text-[#C7DBE6]">Chelle's Store</div>
 
       {/* Search Bar */}
       <div className="flex items-center gap-2 w-full max-w-md">

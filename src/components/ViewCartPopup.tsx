@@ -58,7 +58,10 @@ const ViewCartPopup: React.FC<Props> = ({ onClose }) => {
                         aria-label="delete"
                         size="small"
                       >
-                        <RemoveIcon fontSize="inherit" />
+                        <RemoveIcon
+                          className="text-[#B5BEC6]"
+                          fontSize="inherit"
+                        />
                       </IconButton>
                       {item.quantity}
                       <IconButton
@@ -66,7 +69,10 @@ const ViewCartPopup: React.FC<Props> = ({ onClose }) => {
                         aria-label="add"
                         size="small"
                       >
-                        <AddIcon fontSize="inherit" />
+                        <AddIcon
+                          className="text-[#B5BEC6]"
+                          fontSize="inherit"
+                        />
                       </IconButton>
                     </div>
                   </div>
@@ -82,7 +88,7 @@ const ViewCartPopup: React.FC<Props> = ({ onClose }) => {
         </div>
 
         <Button
-          className="cursor-pointer mt-4 bg-white text-black px-4 py-2 rounded hover:bg-gray-500 hover:text-white"
+          className="cursor-pointer mt-4 bg-white text-[#071108] px-4 py-2 rounded hover:bg-[#B5BEC6]"
           onClick={onClose}
           title="Close"
         />

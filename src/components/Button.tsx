@@ -11,7 +11,7 @@ const Button: React.FC<Props> = ({ onClick, title, className }) => {
       className={
         className
           ? className
-          : `cursor-pointer mt-4 bg-black text-white px-4 py-2 rounded hover:bg-gray-500`
+          : `cursor-pointer mt-4 bg-[#071108] text-white px-4 py-2 rounded hover:bg-[#B5BEC6] hover:text-[#071108]`
       }
     >
       {title}

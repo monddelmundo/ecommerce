@@ -9,7 +9,7 @@ const CategoryItem = ({ categoryTitle, isActive, onClick }: CategoryItem) => {
     <li
       onClick={onClick}
       className={`cursor-pointer underline ${
-        isActive ? "text-blue-500" : "text-gray-800"
+        isActive ? "text-[#071108]" : "text-[#364652]"
       }`}
     >
       {categoryTitle}

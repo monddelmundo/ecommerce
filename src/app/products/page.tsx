@@ -1,6 +1,6 @@
 "use client";
 import ViewCartPopup from "@/components/ViewCartPopup";
-import { useState, useEffect, Dispatch, SetStateAction } from "react";
+import { useState, useEffect, Dispatch, SetStateAction, useMemo } from "react";
 import { fetchProducts } from "../api/products";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "@/components/Loader";
@@ -11,7 +11,7 @@ import { toast } from "react-toastify";
 import Button from "@/components/Button";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../store";
-import { addToCart, setCart } from "../store/cartSlice";
+import { addToCart } from "../store/cartSlice";
 import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import ListIcon from "@mui/icons-material/List";
 import RatingList from "@/components/RatingList";
@@ -43,6 +43,7 @@ const ProductPage = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedRating, setSelectedRating] = useState(1);
+  const [shouldApplyPriceFilters, setShouldApplyPriceFilters] = useState(false);
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -51,7 +52,6 @@ const ProductPage = () => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
 
-  console.log(filters.searchTxt);
   const {
     data: products,
     isLoading,
@@ -68,7 +68,7 @@ const ProductPage = () => {
     }
   }, [isSuccess, products, dispatch]);
 
-  const filteredProducts = (): Product[] => {
+  const filteredProducts = useMemo((): Product[] => {
     if (products?.length > 0) {
       let finalProducts = [...products];
       if (minPrice && maxPrice) {
@@ -99,12 +99,20 @@ const ProductPage = () => {
       finalProducts = finalProducts
         ?.filter((product: Product) => product.rating.rate >= selectedRating)
         ?.filter((product: Product) => product.rating.rate >= selectedRating);
+      setCurrentPage(1);
+      setShouldApplyPriceFilters(false);
       return finalProducts;
     } else return [];
-  };
+  }, [
+    filters.searchTxt,
+    selectedCategory,
+    selectedRating,
+    products,
+    shouldApplyPriceFilters,
+  ]);
 
-  const paginatedItems = filteredProducts().slice(startIndex, endIndex);
-  const totalPages = Math.ceil(filteredProducts().length / itemsPerPage);
+  const paginatedItems = filteredProducts.slice(startIndex, endIndex);
+  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const getCategories = () => {
     const categories = new Map();
     products?.forEach((product: Product) => {
@@ -125,10 +133,12 @@ const ProductPage = () => {
   const handleClickCategoryItem = (category: string) => {
     if (category === selectedCategory) setSelectedCategory("");
     else setSelectedCategory(category);
+    setCurrentPage(1);
   };
 
   const handleRatingItemClick = (rating: number) => {
     setSelectedRating(rating);
+    setCurrentPage(1);
   };
 
   const handleChange = (
@@ -137,6 +147,9 @@ const ProductPage = () => {
   ) => {
     const numeric = value.replace(/\D/g, ""); // Remove non-digits
     setter(numeric);
+    setCurrentPage(1);
+
+    if (minPrice && maxPrice) setShouldApplyPriceFilters(true);
   };
 
   const handleClearFilters = () => {
@@ -144,13 +157,15 @@ const ProductPage = () => {
     setMaxPrice("");
     setSelectedCategory("");
     setSelectedRating(1);
+    setCurrentPage(1);
+    setShouldApplyPriceFilters(true);
   };
 
   return (
     <ErrorBoundary>
       <div className="p-8 bg-gray-50 min-h-screen">
         {isOpen && <ViewCartPopup onClose={() => setIsOpen(false)} />}
-        <div className="mt-5 w-4/6 mx-auto grid grid-cols-1 lg:grid-cols-7 gap-6">
+        <div className="w-4/6 mx-auto grid grid-cols-1 lg:grid-cols-7 gap-6">
           <div className="col-span-2">
             <>
               <h3
@@ -214,27 +229,31 @@ const ProductPage = () => {
             </>
           </div>
           <div className="col-span-5">
-            <div className="flex justify-end mt-6 gap-2 mb-5">
-              <span className="text-[#FE9920]">{currentPage}</span>
-              {` / ${totalPages}`}
-              <button
-                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                disabled={currentPage === 1}
-                className="px-3 py-1 bg-gray-200 text-sm cursor-pointer rounded disabled:opacity-50"
-              >
-                &lt;
-              </button>
+            {paginatedItems?.length > 0 && (
+              <div className="flex justify-end mt-6 gap-2 mb-5">
+                <span className="text-[#FE9920]">{currentPage}</span>
+                {` / ${totalPages}`}
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.max(prev - 1, 1))
+                  }
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 bg-gray-200 text-sm cursor-pointer rounded disabled:opacity-50"
+                >
+                  &lt;
+                </button>
 
-              <button
-                onClick={() =>
-                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-                }
-                disabled={currentPage === totalPages}
-                className="px-3 py-1 bg-gray-200 text-sm rounded cursor-pointer disabled:opacity-50"
-              >
-                &gt;
-              </button>
-            </div>
+                <button
+                  onClick={() =>
+                    setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                  }
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 bg-gray-200 text-sm rounded cursor-pointer disabled:opacity-50"
+                >
+                  &gt;
+                </button>
+              </div>
+            )}
             {isLoading ? (
               <div className="flex justify-center">
                 <Loader />
@@ -283,7 +302,7 @@ const ProductPage = () => {
                       </div>
                     </div>
                   ))}
-                {filteredProducts().length === 0 && <h3>No item found.</h3>}
+                {filteredProducts.length === 0 && <h3>No item found.</h3>}
               </div>
             )}
           </div>

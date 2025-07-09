@@ -16,12 +16,13 @@ import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import ListIcon from "@mui/icons-material/List";
 import RatingList from "@/components/RatingList";
 import BasicTextField from "@/components/Textfield";
+import { setProducts } from "../store/productSlice";
 
 type Rating = {
   rate: number;
   count: number;
 };
-type Product = {
+export type Product = {
   id: number;
   title: string;
   category: string;
@@ -38,42 +39,72 @@ export type CartProduct = {
 
 const ProductPage = () => {
   const dispatch = useDispatch();
-  const cart = useSelector((state: RootState) => state.cart.items);
+  const filters = useSelector((state: RootState) => state.product.filters);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedRating, setSelectedRating] = useState(1);
   const [minPrice, setMinPrice] = useState("");
   const [maxPrice, setMaxPrice] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+
+  console.log(filters.searchTxt);
   const {
     data: products,
     isLoading,
+    isSuccess,
     error,
   } = useQuery({
     queryKey: ["products"],
     queryFn: fetchProducts,
   });
 
-  const filteredProducts = (): Product[] => {
-    let finalProducts = [...products];
-    if (minPrice && maxPrice) {
-      finalProducts = finalProducts.filter(
-        (product: Product) =>
-          product.price >= Number(minPrice) && product.price <= Number(maxPrice)
-      );
+  useEffect(() => {
+    if (isSuccess && products) {
+      dispatch(setProducts(products));
     }
+  }, [isSuccess, products, dispatch]);
 
-    if (selectedCategory) {
-      finalProducts = finalProducts.filter(
-        (product: Product) => product.category === selectedCategory
-      );
-    }
-    finalProducts = finalProducts
-      ?.filter((product: Product) => product.rating.rate >= selectedRating)
-      ?.filter((product: Product) => product.rating.rate >= selectedRating);
-    return finalProducts;
+  const filteredProducts = (): Product[] => {
+    if (products?.length > 0) {
+      let finalProducts = [...products];
+      if (minPrice && maxPrice) {
+        finalProducts = finalProducts.filter(
+          (product: Product) =>
+            product.price >= Number(minPrice) &&
+            product.price <= Number(maxPrice)
+        );
+      }
+
+      if (filters.searchTxt) {
+        finalProducts = finalProducts.filter(
+          (product: Product) =>
+            product.title
+              .toLowerCase()
+              .includes(filters.searchTxt.toLowerCase()) ||
+            product.description
+              .toLowerCase()
+              .includes(filters.searchTxt.toLowerCase())
+        );
+      }
+
+      if (selectedCategory) {
+        finalProducts = finalProducts.filter(
+          (product: Product) => product.category === selectedCategory
+        );
+      }
+      finalProducts = finalProducts
+        ?.filter((product: Product) => product.rating.rate >= selectedRating)
+        ?.filter((product: Product) => product.rating.rate >= selectedRating);
+      return finalProducts;
+    } else return [];
   };
 
+  const paginatedItems = filteredProducts().slice(startIndex, endIndex);
+  const totalPages = Math.ceil(filteredProducts().length / itemsPerPage);
   const getCategories = () => {
     const categories = new Map();
     products?.forEach((product: Product) => {
@@ -118,19 +149,8 @@ const ProductPage = () => {
   return (
     <ErrorBoundary>
       <div className="p-8 bg-gray-50 min-h-screen">
-        <h1 className="text-3xl font-bold mb-6">Product Catalog</h1>
-        <h3>
-          You have {cart.length} item(s) on your{" "}
-          <span
-            onClick={() => setIsOpen(true)}
-            className="underline text-blue-500 cursor-pointer"
-          >
-            cart
-          </span>
-          .
-        </h3>
         {isOpen && <ViewCartPopup onClose={() => setIsOpen(false)} />}
-        <div className="mt-10 w-4/6 mx-auto grid grid-cols-1 lg:grid-cols-7 gap-6">
+        <div className="mt-5 w-4/6 mx-auto grid grid-cols-1 lg:grid-cols-7 gap-6">
           <div className="col-span-2">
             <>
               <h3
@@ -146,6 +166,7 @@ const ProductPage = () => {
                 getCategories().map((category) => {
                   return (
                     <CategoryItem
+                      key={category}
                       isActive={selectedCategory === category}
                       categoryTitle={category}
                       onClick={() => handleClickCategoryItem(category)}
@@ -193,14 +214,35 @@ const ProductPage = () => {
             </>
           </div>
           <div className="col-span-5">
+            <div className="flex justify-end mt-6 gap-2 mb-5">
+              <span className="text-[#FE9920]">{currentPage}</span>
+              {` / ${totalPages}`}
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className="px-3 py-1 bg-gray-200 text-sm cursor-pointer rounded disabled:opacity-50"
+              >
+                &lt;
+              </button>
+
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 bg-gray-200 text-sm rounded cursor-pointer disabled:opacity-50"
+              >
+                &gt;
+              </button>
+            </div>
             {isLoading ? (
               <div className="flex justify-center">
                 <Loader />
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                {filteredProducts()?.length > 0 &&
-                  filteredProducts().map((product: Product) => (
+                {paginatedItems?.length > 0 &&
+                  paginatedItems.map((product: Product) => (
                     <div
                       key={product.id}
                       className="bg-white shadow-md rounded-lg overflow-hidden"

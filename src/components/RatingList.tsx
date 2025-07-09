@@ -19,7 +19,8 @@ const RatingList: React.FC<props> = ({ onClick, selectedRating }) => {
   }) => {
     let renderItems = [];
     for (let i = 1; i <= 5; i++) {
-      if (rating >= i) renderItems.push(<StarIcon fontSize="inherit" />);
+      if (rating >= i)
+        renderItems.push(<StarIcon fontSize="inherit" key={i} />);
       else renderItems.push(<StarBorderIcon fontSize="inherit" key={i} />);
     }
     return (

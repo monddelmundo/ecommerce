@@ -1,3 +1,4 @@
+import Navbar from "@/components/Navbar";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -32,7 +33,10 @@ export default function RootLayout({
       >
         <ToastProvider>
           <ReactQueryProvider>
-            <ReduxProvider>{children}</ReduxProvider>
+            <ReduxProvider>
+              <Navbar />
+              {children}
+            </ReduxProvider>
           </ReactQueryProvider>
         </ToastProvider>
       </body>

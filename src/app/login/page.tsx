@@ -1,7 +1,7 @@
 // app/(auth)/login/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Container, Typography, Paper } from "@mui/material";
 import BasicTextField from "@/components/Textfield";
 import Button from "@/components/Button";
@@ -41,7 +41,6 @@ export default function LoginPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // console.log("Login submitted:", form);
 
     authMutation.mutate({ email: form.email, password: form.password });
   };
@@ -78,6 +77,9 @@ export default function LoginPage() {
             required
             type="password"
           />
+          {authMutation.isError && (
+            <span className="text-red-500">Invalid username/password</span>
+          )}
           <Button
             title="Login"
             isLoading={authMutation.isPending}

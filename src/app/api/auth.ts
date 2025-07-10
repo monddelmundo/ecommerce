@@ -14,6 +14,18 @@ export const authenticateUser = async ({
     credentials: "include",
     body: JSON.stringify(dataToSend),
   });
-  if (!res.ok) throw new Error("Failed to fetch");
+  if (!res.ok) throw new Error("Failed to authenticate");
+  return res.json();
+};
+
+export const logout = async () => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/users-permissions/auth/logout`,
+    {
+      method: "POST",
+      credentials: "include",
+    }
+  );
+  if (!res.ok) throw new Error("Failed to logout");
   return res.json();
 };

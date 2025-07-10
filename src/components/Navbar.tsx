@@ -11,6 +11,10 @@ import ViewCartPopup from "./ViewCartPopup";
 import { RootState } from "@/app/store";
 import { Menu, MenuItem } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { useMutation } from "@tanstack/react-query";
+import { logout } from "@/app/api/auth";
+import { setUser } from "@/app/store/userSlice";
+import { toast } from "react-toastify";
 
 const Navbar: React.FC = () => {
   const [search, setSearch] = useState("");
@@ -33,6 +37,17 @@ const Navbar: React.FC = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const logoutMutation = useMutation({
+    mutationFn: logout,
+    onSuccess: (data) => {
+      console.log("User Logged out successfully!:", data);
+      dispatch(setUser(null));
+    },
+    onError: (error) => {
+      toast.error("Failed to logout" + error);
+    },
+  });
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -92,7 +107,9 @@ const Navbar: React.FC = () => {
               >
                 <MenuItem onClick={handleClose}>Profile</MenuItem>
                 <MenuItem onClick={handleClose}>Orders</MenuItem>
-                <MenuItem onClick={handleClose}>Logout</MenuItem>
+                <MenuItem onClick={() => logoutMutation.mutate()}>
+                  Logout
+                </MenuItem>
               </Menu>
             </>
           ) : (

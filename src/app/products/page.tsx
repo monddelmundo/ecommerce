@@ -29,7 +29,9 @@ export type Product = {
   description: string;
   price: number;
   rating: Rating;
-  image: string;
+  image: {
+    url: string;
+  };
 };
 
 export type CartProduct = {
@@ -267,7 +269,7 @@ const ProductPage = () => {
                       className="bg-white shadow-md rounded-lg overflow-hidden"
                     >
                       <img
-                        src={product.image}
+                        src={`${process.env.NEXT_PUBLIC_UPLOADS_URL}${product.image.url}`}
                         alt={product.title}
                         className="w-full h-48 object-contain"
                       />

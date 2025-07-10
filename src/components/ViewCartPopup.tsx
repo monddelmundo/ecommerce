@@ -44,7 +44,7 @@ const ViewCartPopup: React.FC<Props> = ({ onClose }) => {
                 className="flex items-center justify-between"
               >
                 <img
-                  src={item.product.image}
+                  src={`${process.env.NEXT_PUBLIC_UPLOADS_URL}${item.product.image.url}`}
                   alt={item.product.title}
                   className="w-12 h-12 object-contain rounded"
                 />

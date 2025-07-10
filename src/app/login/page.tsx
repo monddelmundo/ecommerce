@@ -8,6 +8,9 @@ import Button from "@/components/Button";
 import { useDispatch } from "react-redux";
 import { setUser } from "../store/userSlice";
 import { useRouter } from "next/navigation";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { authenticateUser } from "../api/auth";
+import { toast } from "react-toastify";
 
 export default function LoginPage() {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -17,20 +20,30 @@ export default function LoginPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
+  const authMutation = useMutation({
+    mutationFn: authenticateUser,
+    onSuccess: (data) => {
+      console.log("User Logged in successfully!:", data);
+      dispatch(
+        setUser({
+          emailAddress: data.user.email,
+          firstName: data.user.firstName,
+          lastName: data.user.lastName,
+          profilePhoto: data.user?.profilePhoto,
+        })
+      );
+      router.push("/products");
+    },
+    onError: (error) => {
+      toast.error("Invalid email/password!");
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Login submitted:", form);
-    dispatch(
-      setUser({
-        emailAddress: "test@gmail.com",
-        firstName: "Harry",
-        lastName: "Potter",
-        profilePhoto: "",
-      })
-    );
-    router.push("/products");
+    // console.log("Login submitted:", form);
 
-    // Add auth logic here
+    authMutation.mutate({ email: form.email, password: form.password });
   };
 
   return (
@@ -65,7 +78,11 @@ export default function LoginPage() {
             required
             type="password"
           />
-          <Button title="Login" type="submit" />
+          <Button
+            title="Login"
+            isLoading={authMutation.isPending}
+            type="submit"
+          />
         </form>
       </Paper>
     </Container>

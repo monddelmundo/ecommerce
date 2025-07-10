@@ -1,3 +1,4 @@
+import ClientAuthWrapper from "@/components/ClientAuthWrapper";
 import Navbar from "@/components/Navbar";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -33,7 +34,10 @@ export default function RootLayout({
       >
         <ToastProvider>
           <ReactQueryProvider>
-            <ReduxProvider>{children}</ReduxProvider>
+            <ReduxProvider>
+              <ClientAuthWrapper />
+              {children}
+            </ReduxProvider>
           </ReactQueryProvider>
         </ToastProvider>
       </body>

@@ -92,7 +92,7 @@ const Navbar: React.FC = () => {
         <div className="flex items-center gap-2">
           {userDetails.user ? (
             <>
-              <div onClick={handleClick}>
+              <div onClick={handleClick} className="cursor-pointer">
                 <PersonIcon className="text-[#C7DBE6] text-xl" />
                 <span className="text-sm text-[#C7DBE6]">
                   Hi, {userDetails.user?.firstName}

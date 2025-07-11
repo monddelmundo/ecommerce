@@ -1,12 +1,20 @@
+import { useEffect } from "react";
 import { CartProduct } from "@/app/products/page";
 import { IconButton } from "@mui/material";
 import { useState } from "react";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
 import Button from "./Button";
-import { addQty, setCart, subtractQty } from "@/app/store/cartSlice";
+import {
+  addQty,
+  checkUncheck,
+  checkUncheckAll,
+  setCart,
+  subtractQty,
+} from "@/app/store/cartSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/app/store";
+import Checkbox from "./Checkbox";
 
 interface Props {
   onClose: () => void;
@@ -18,13 +26,31 @@ const ADD = "ADD";
 const ViewCartPopup: React.FC<Props> = ({ onClose }) => {
   const dispatch = useDispatch();
   const cartItems = useSelector((state: RootState) => state.cart.items);
+  const [selectAll, setSelectAll] = useState(false);
   const total = cartItems.reduce(
-    (sum, item) => sum + item.product.price * item.quantity,
+    (sum, item) =>
+      sum + (item.isChecked ? item.product.price * item.quantity : 0),
     0
   );
 
+  useEffect(() => {
+    setSelectAll(cartItems.every((item) => item.isChecked));
+  }, [cartItems]);
+
   const handleQty = (productId: number, operation: string) => {
     dispatch(operation === ADD ? addQty(productId) : subtractQty(productId));
+  };
+
+  const handleCheckboxCartChange = (
+    e: React.ChangeEvent<HTMLInputElement>,
+    id: number
+  ) => {
+    dispatch(checkUncheck({ id, isChecked: e.target.checked }));
+  };
+
+  const handleCheckboxAllChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch(checkUncheckAll(e.target.checked));
+    setSelectAll(e.target.checked);
   };
 
   const handleCheckout = () => {};
@@ -43,6 +69,12 @@ const ViewCartPopup: React.FC<Props> = ({ onClose }) => {
                 key={item.product.id}
                 className="flex items-center justify-between"
               >
+                <Checkbox
+                  checked={item.isChecked}
+                  handleChange={(e) =>
+                    handleCheckboxCartChange(e, item.product.id)
+                  }
+                />
                 <img
                   src={`${process.env.NEXT_PUBLIC_UPLOADS_URL}${item.product.image.url}`}
                   alt={item.product.title}
@@ -82,6 +114,11 @@ const ViewCartPopup: React.FC<Props> = ({ onClose }) => {
           </ul>
         )}
 
+        <Checkbox
+          title="Select All"
+          checked={selectAll}
+          handleChange={(e) => handleCheckboxAllChange(e)}
+        />
         <div className="mt-4">
           <p className="text-lg font-semibold">Total: ${total.toFixed(2)}</p>
           <Button onClick={handleCheckout} title="Proceed to Checkout" />

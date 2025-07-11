@@ -1,14 +1,14 @@
 // app/(auth)/login/page.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Container, Typography, Paper } from "@mui/material";
 import BasicTextField from "@/components/Textfield";
 import Button from "@/components/Button";
 import { useDispatch } from "react-redux";
 import { setUser } from "../store/userSlice";
 import { useRouter } from "next/navigation";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { authenticateUser } from "../api/auth";
 import { toast } from "react-toastify";
 
@@ -30,6 +30,7 @@ export default function LoginPage() {
           firstName: data.user.firstName,
           lastName: data.user.lastName,
           profilePhoto: data.user?.profilePhoto,
+          documentId: data.user.documentId,
         })
       );
       router.push("/products");

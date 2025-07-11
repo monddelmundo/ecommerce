@@ -25,22 +25,42 @@ const cartSlice = createSlice({
         state.items.push(item);
       }
     },
+    checkUncheck(
+      state,
+      action: PayloadAction<{ id: number; isChecked: boolean }>
+    ) {
+      const newItems = [...state.items];
+      const existing = newItems.find((i) => i.product.id === action.payload.id);
+      if (existing) {
+        existing.isChecked = action.payload.isChecked;
+      }
+      state.items = newItems;
+    },
+    checkUncheckAll(state, action: PayloadAction<boolean>) {
+      state.items = state.items.map((item: CartProduct) => ({
+        ...item,
+        isChecked: action.payload,
+      }));
+    },
     subtractQty(state, action: PayloadAction<number>) {
-      const existing = state.items.find((i) => i.product.id === action.payload);
+      const newItems = [...state.items];
+      const existing = newItems.find((i) => i.product.id === action.payload);
       if (existing) {
         existing.quantity -= 1;
         if (existing.quantity === 0) {
-          state.items = state.items.filter(
+          state.items = newItems.filter(
             (item) => item.product.id !== action.payload
           );
         }
       }
     },
     addQty(state, action: PayloadAction<number>) {
-      const existing = state.items.find((i) => i.product.id === action.payload);
+      const newItems = [...state.items];
+      const existing = newItems.find((i) => i.product.id === action.payload);
       if (existing) {
         existing.quantity += 1;
       }
+      state.items = newItems;
     },
     setCart(state, action: PayloadAction<CartProduct[]>) {
       state.items = { ...action.payload };
@@ -62,6 +82,8 @@ export const {
   clearCart,
   setCart,
   addQty,
+  checkUncheck,
+  checkUncheckAll,
   subtractQty,
 } = cartSlice.actions;
 export default cartSlice.reducer;

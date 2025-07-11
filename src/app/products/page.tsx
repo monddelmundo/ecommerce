@@ -17,6 +17,11 @@ import ListIcon from "@mui/icons-material/List";
 import RatingList from "@/components/RatingList";
 import BasicTextField from "@/components/Textfield";
 import { setProducts } from "../store/productSlice";
+import {
+  addItemAndSyncCart,
+  useCreateCartItemMutation,
+} from "../api/cartProducts";
+import { useAppDispatch } from "../hooks";
 
 type Rating = {
   rate: number;
@@ -25,6 +30,7 @@ type Rating = {
 export type Product = {
   id: number;
   title: string;
+  documentId: string;
   category: string;
   description: string;
   price: number;
@@ -37,11 +43,15 @@ export type Product = {
 export type CartProduct = {
   quantity: number;
   product: Product;
+  isChecked: boolean;
+  // @TODO: Add delisted value
 };
 
 const ProductPage = () => {
   const dispatch = useDispatch();
+  const appDispatch = useAppDispatch();
   const filters = useSelector((state: RootState) => state.product.filters);
+  const user = useSelector((state: RootState) => state.user);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("");
   const [selectedRating, setSelectedRating] = useState(1);
@@ -50,6 +60,10 @@ const ProductPage = () => {
   const [maxPrice, setMaxPrice] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
+  const [
+    createCartItem,
+    { isLoading: isLoadingCreateCart, error: errorCreateCart },
+  ] = useCreateCartItemMutation();
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -123,9 +137,18 @@ const ProductPage = () => {
     return Array.from(categories.keys());
   };
 
-  const handleAddToCart = (product: Product) => {
+  const handleAddToCart = async (product: Product) => {
     try {
-      dispatch(addToCart({ product, quantity: 1 }));
+      if (user.user?.documentId) {
+        await appDispatch(
+          addItemAndSyncCart({ quantity: 1, isChecked: true, product })
+        );
+        // await createCartItem({
+        //   userDocId: user.user.documentId,
+        //   cartProduct: { quantity: 1, isChecked: true, product },
+        // }).unwrap();
+      }
+      //else dispatch(addToCart({ product, quantity: 1, isChecked: true }));
       toast.success("Item added to cart.");
     } catch (error) {
       console.error(error);

@@ -6,6 +6,7 @@ interface User {
   firstName: string;
   lastName: string;
   profilePhoto: string;
+  documentId: string;
 }
 
 interface UserState {

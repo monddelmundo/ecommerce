@@ -39,6 +39,7 @@ const ViewCartPopup: React.FC<Props> = ({ onClose }) => {
 
   const handleQty = (productId: number, operation: string) => {
     dispatch(operation === ADD ? addQty(productId) : subtractQty(productId));
+    // @TODO: Update cart item
   };
 
   const handleCheckboxCartChange = (

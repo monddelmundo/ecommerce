@@ -15,6 +15,8 @@ import { useMutation } from "@tanstack/react-query";
 import { logout } from "@/app/api/auth";
 import { setUser } from "@/app/store/userSlice";
 import { toast } from "react-toastify";
+import { useGetCartQuery } from "@/app/api/cartProducts";
+import { setCart } from "@/app/store/cartSlice";
 
 const Navbar: React.FC = () => {
   const [search, setSearch] = useState("");
@@ -29,7 +31,7 @@ const Navbar: React.FC = () => {
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-
+  const { data: items, isSuccess, error, isLoading } = useGetCartQuery();
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -37,6 +39,12 @@ const Navbar: React.FC = () => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  useEffect(() => {
+    if (isSuccess && items) {
+      dispatch(setCart(items.data));
+    }
+  }, [isSuccess, items, dispatch]);
 
   const logoutMutation = useMutation({
     mutationFn: logout,

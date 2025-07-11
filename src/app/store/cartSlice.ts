@@ -63,7 +63,7 @@ const cartSlice = createSlice({
       state.items = newItems;
     },
     setCart(state, action: PayloadAction<CartProduct[]>) {
-      state.items = { ...action.payload };
+      state.items = action.payload;
     },
     removeFromCart(state, action: PayloadAction<number>) {
       state.items = state.items.filter(

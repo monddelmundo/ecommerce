@@ -16,14 +16,14 @@ const cartSlice = createSlice({
   reducers: {
     addToCart(state, action: PayloadAction<CartProduct>) {
       const item = action.payload;
-      const existing = state.items.find(
-        (i) => i.product.id === item.product.id
-      );
+      const itemsClone = [...state.items];
+      const existing = itemsClone.find((i) => i.product.id === item.product.id);
       if (existing) {
         existing.quantity += item.quantity;
       } else {
-        state.items.push(item);
+        itemsClone.push(item);
       }
+      state.items = itemsClone;
     },
     checkUncheck(
       state,
@@ -65,6 +65,14 @@ const cartSlice = createSlice({
     setCart(state, action: PayloadAction<CartProduct[]>) {
       state.items = action.payload;
     },
+    updateCartItem(state, action: PayloadAction<CartProduct>) {
+      state.items = state.items.map((cartProduct: CartProduct) => {
+        if (action.payload.product.id === cartProduct.product.id) {
+          return action.payload;
+        }
+        return cartProduct;
+      });
+    },
     removeFromCart(state, action: PayloadAction<number>) {
       state.items = state.items.filter(
         (item) => item.product.id !== action.payload
@@ -82,6 +90,7 @@ export const {
   clearCart,
   setCart,
   addQty,
+  updateCartItem,
   checkUncheck,
   checkUncheckAll,
   subtractQty,

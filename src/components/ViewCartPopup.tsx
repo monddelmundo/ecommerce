@@ -15,6 +15,11 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "@/app/store";
 import Checkbox from "./Checkbox";
+import { useAppDispatch } from "@/app/hooks";
+import {
+  addItemAndSyncCart,
+  updateItemAndSyncCart,
+} from "@/app/api/cartProducts";
 
 interface Props {
   onClose: () => void;
@@ -25,9 +30,11 @@ const ADD = "ADD";
 
 const ViewCartPopup: React.FC<Props> = ({ onClose }) => {
   const dispatch = useDispatch();
+  const appDispatch = useAppDispatch();
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const [selectAll, setSelectAll] = useState(false);
-  const total = cartItems.reduce(
+  console.log(cartItems);
+  const total = cartItems?.reduce(
     (sum, item) =>
       sum + (item.isChecked ? item.product.price * item.quantity : 0),
     0
@@ -37,9 +44,10 @@ const ViewCartPopup: React.FC<Props> = ({ onClose }) => {
     setSelectAll(cartItems.every((item) => item.isChecked));
   }, [cartItems]);
 
-  const handleQty = (productId: number, operation: string) => {
-    dispatch(operation === ADD ? addQty(productId) : subtractQty(productId));
-    // @TODO: Update cart item
+  const handleQty = async (cartProduct: CartProduct, operation: string) => {
+    const qty =
+      operation === ADD ? cartProduct.quantity + 1 : cartProduct.quantity - 1;
+    await appDispatch(updateItemAndSyncCart({ ...cartProduct, quantity: qty }));
   };
 
   const handleCheckboxCartChange = (
@@ -87,7 +95,7 @@ const ViewCartPopup: React.FC<Props> = ({ onClose }) => {
                     <p className="text-sm ">${item.product.price.toFixed(2)}</p>
                     <div>
                       <IconButton
-                        onClick={() => handleQty(item.product.id, SUBTRACT)}
+                        onClick={() => handleQty(item, SUBTRACT)}
                         aria-label="delete"
                         size="small"
                       >
@@ -98,7 +106,7 @@ const ViewCartPopup: React.FC<Props> = ({ onClose }) => {
                       </IconButton>
                       {item.quantity}
                       <IconButton
-                        onClick={() => handleQty(item.product.id, ADD)}
+                        onClick={() => handleQty(item, ADD)}
                         aria-label="add"
                         size="small"
                       >

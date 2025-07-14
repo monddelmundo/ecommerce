@@ -44,6 +44,8 @@ export type CartProduct = {
   quantity: number;
   product: Product;
   isChecked: boolean;
+  documentId: string;
+  updatedAt: Date;
   // @TODO: Add delisted value
 };
 
@@ -143,12 +145,7 @@ const ProductPage = () => {
         await appDispatch(
           addItemAndSyncCart({ quantity: 1, isChecked: true, product })
         );
-        // await createCartItem({
-        //   userDocId: user.user.documentId,
-        //   cartProduct: { quantity: 1, isChecked: true, product },
-        // }).unwrap();
       }
-      //else dispatch(addToCart({ product, quantity: 1, isChecked: true }));
       toast.success("Item added to cart.");
     } catch (error) {
       console.error(error);

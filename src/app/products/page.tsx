@@ -81,7 +81,7 @@ const ProductPage = () => {
     queryKey: ["products"],
     queryFn: () => fetchProducts(filters),
   });
-  const { data: categories } = useQuery({
+  const { data: categories, isLoading: isLoadingCategories } = useQuery({
     queryKey: ["categories"],
     queryFn: fetchCategories,
   });
@@ -99,22 +99,7 @@ const ProductPage = () => {
   const filteredProducts = useMemo((): Product[] => {
     if (products?.length > 0) {
       let finalProducts = [...products];
-      if (filters.minPrice && filters.maxPrice) {
-        finalProducts = finalProducts.filter(
-          (product: Product) =>
-            product.price >= Number(filters.minPrice) &&
-            product.price <= Number(filters.maxPrice)
-        );
-      }
 
-      if (filters.category) {
-        finalProducts = finalProducts.filter(
-          (product: Product) => product.category === filters.category
-        );
-      }
-      finalProducts = finalProducts
-        ?.filter((product: Product) => product.rating.rate >= filters.rating)
-        ?.filter((product: Product) => product.rating.rate >= filters.rating);
       setCurrentPage(1);
       setShouldApplyPriceFilters(false);
       return finalProducts;
@@ -179,7 +164,7 @@ const ProductPage = () => {
                 <ListIcon className="mr-2" fontSize="small" />
                 All Categories
               </h3>
-              {isLoading ? (
+              {isLoadingCategories ? (
                 <Loader />
               ) : (
                 categories?.map((category: string) => {

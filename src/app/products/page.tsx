@@ -72,14 +72,18 @@ const ProductPage = () => {
 
   const {
     data: products,
+    refetch,
     isLoading,
     isSuccess,
     error,
   } = useQuery({
     queryKey: ["products"],
-    queryFn: fetchProducts,
+    queryFn: () => fetchProducts(filters.searchTxt),
   });
 
+  useEffect(() => {
+    refetch();
+  }, [filters.searchTxt]);
   useEffect(() => {
     if (isSuccess && products) {
       dispatch(setProducts(products));
@@ -94,18 +98,6 @@ const ProductPage = () => {
           (product: Product) =>
             product.price >= Number(minPrice) &&
             product.price <= Number(maxPrice)
-        );
-      }
-
-      if (filters.searchTxt) {
-        finalProducts = finalProducts.filter(
-          (product: Product) =>
-            product.title
-              .toLowerCase()
-              .includes(filters.searchTxt.toLowerCase()) ||
-            product.description
-              .toLowerCase()
-              .includes(filters.searchTxt.toLowerCase())
         );
       }
 

@@ -1,7 +1,7 @@
 "use client";
 import ViewCartPopup from "@/components/ViewCartPopup";
 import { useState, useEffect, Dispatch, SetStateAction, useMemo } from "react";
-import { fetchProducts } from "../api/products";
+import { fetchCategories, fetchProducts } from "../api/products";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "@/components/Loader";
 import ErrorBoundary from "@/components/ReactBoundary";
@@ -16,12 +16,21 @@ import FilterAltOutlinedIcon from "@mui/icons-material/FilterAltOutlined";
 import ListIcon from "@mui/icons-material/List";
 import RatingList from "@/components/RatingList";
 import BasicTextField from "@/components/Textfield";
-import { setProducts } from "../store/productSlice";
+import {
+  clearFilters,
+  selectCategory,
+  selectRating,
+  setFilters,
+  setMaxPrice,
+  setMinPrice,
+  setProducts,
+} from "../store/productSlice";
 import {
   addItemAndSyncCart,
   useCreateCartItemMutation,
 } from "../api/cartProducts";
 import { useAppDispatch } from "../hooks";
+import { ActionCreatorWithPayload } from "@reduxjs/toolkit";
 
 type Rating = {
   rate: number;
@@ -55,17 +64,9 @@ const ProductPage = () => {
   const filters = useSelector((state: RootState) => state.product.filters);
   const user = useSelector((state: RootState) => state.user);
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [selectedRating, setSelectedRating] = useState(1);
   const [shouldApplyPriceFilters, setShouldApplyPriceFilters] = useState(false);
-  const [minPrice, setMinPrice] = useState("");
-  const [maxPrice, setMaxPrice] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const [
-    createCartItem,
-    { isLoading: isLoadingCreateCart, error: errorCreateCart },
-  ] = useCreateCartItemMutation();
 
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
@@ -78,12 +79,17 @@ const ProductPage = () => {
     error,
   } = useQuery({
     queryKey: ["products"],
-    queryFn: () => fetchProducts(filters.searchTxt),
+    queryFn: () => fetchProducts(filters),
+  });
+  const { data: categories } = useQuery({
+    queryKey: ["categories"],
+    queryFn: fetchCategories,
   });
 
   useEffect(() => {
     refetch();
-  }, [filters.searchTxt]);
+  }, [filters]);
+
   useEffect(() => {
     if (isSuccess && products) {
       dispatch(setProducts(products));
@@ -93,43 +99,30 @@ const ProductPage = () => {
   const filteredProducts = useMemo((): Product[] => {
     if (products?.length > 0) {
       let finalProducts = [...products];
-      if (minPrice && maxPrice) {
+      if (filters.minPrice && filters.maxPrice) {
         finalProducts = finalProducts.filter(
           (product: Product) =>
-            product.price >= Number(minPrice) &&
-            product.price <= Number(maxPrice)
+            product.price >= Number(filters.minPrice) &&
+            product.price <= Number(filters.maxPrice)
         );
       }
 
-      if (selectedCategory) {
+      if (filters.category) {
         finalProducts = finalProducts.filter(
-          (product: Product) => product.category === selectedCategory
+          (product: Product) => product.category === filters.category
         );
       }
       finalProducts = finalProducts
-        ?.filter((product: Product) => product.rating.rate >= selectedRating)
-        ?.filter((product: Product) => product.rating.rate >= selectedRating);
+        ?.filter((product: Product) => product.rating.rate >= filters.rating)
+        ?.filter((product: Product) => product.rating.rate >= filters.rating);
       setCurrentPage(1);
       setShouldApplyPriceFilters(false);
       return finalProducts;
     } else return [];
-  }, [
-    filters.searchTxt,
-    selectedCategory,
-    selectedRating,
-    products,
-    shouldApplyPriceFilters,
-  ]);
+  }, [filters, products, shouldApplyPriceFilters]);
 
   const paginatedItems = filteredProducts.slice(startIndex, endIndex);
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-  const getCategories = () => {
-    const categories = new Map();
-    products?.forEach((product: Product) => {
-      categories.set(product.category, product.category);
-    });
-    return Array.from(categories.keys());
-  };
 
   const handleAddToCart = async (product: Product) => {
     try {
@@ -145,32 +138,29 @@ const ProductPage = () => {
   };
 
   const handleClickCategoryItem = (category: string) => {
-    if (category === selectedCategory) setSelectedCategory("");
-    else setSelectedCategory(category);
+    if (category === filters.category) dispatch(selectCategory(""));
+    else dispatch(selectCategory(category));
     setCurrentPage(1);
   };
 
   const handleRatingItemClick = (rating: number) => {
-    setSelectedRating(rating);
+    dispatch(selectRating(rating));
     setCurrentPage(1);
   };
 
   const handleChange = (
     value: string,
-    setter: Dispatch<SetStateAction<string>>
+    setter: ActionCreatorWithPayload<string>
   ) => {
     const numeric = value.replace(/\D/g, ""); // Remove non-digits
-    setter(numeric);
+    dispatch(setter(numeric));
     setCurrentPage(1);
 
-    if (minPrice && maxPrice) setShouldApplyPriceFilters(true);
+    if (filters.minPrice && filters.maxPrice) setShouldApplyPriceFilters(true);
   };
 
   const handleClearFilters = () => {
-    setMinPrice("");
-    setMaxPrice("");
-    setSelectedCategory("");
-    setSelectedRating(1);
+    dispatch(clearFilters());
     setCurrentPage(1);
     setShouldApplyPriceFilters(true);
   };
@@ -183,7 +173,7 @@ const ProductPage = () => {
           <div className="col-span-2">
             <>
               <h3
-                onClick={() => setSelectedCategory("")}
+                onClick={() => dispatch(selectCategory(""))}
                 className="mb-5 cursor-pointer"
               >
                 <ListIcon className="mr-2" fontSize="small" />
@@ -192,11 +182,11 @@ const ProductPage = () => {
               {isLoading ? (
                 <Loader />
               ) : (
-                getCategories().map((category) => {
+                categories?.map((category: string) => {
                   return (
                     <CategoryItem
                       key={category}
-                      isActive={selectedCategory === category}
+                      isActive={filters.category === category}
                       categoryTitle={category}
                       onClick={() => handleClickCategoryItem(category)}
                     />
@@ -210,7 +200,7 @@ const ProductPage = () => {
               </h3>
               <h4>Rating</h4>
               <RatingList
-                selectedRating={selectedRating}
+                selectedRating={filters.rating}
                 onClick={handleRatingItemClick}
               />
               <Divider flexItem />
@@ -222,7 +212,7 @@ const ProductPage = () => {
                   handleChange={(e) =>
                     handleChange(e.target.value, setMinPrice)
                   }
-                  value={minPrice}
+                  value={filters.minPrice}
                   placeholder="MIN"
                   className="mr-1 w-25"
                 />
@@ -233,7 +223,7 @@ const ProductPage = () => {
                   handleChange={(e) =>
                     handleChange(e.target.value, setMaxPrice)
                   }
-                  value={maxPrice}
+                  value={filters.maxPrice}
                   placeholder="MAX"
                   className="ml-1 w-25"
                 />
@@ -316,7 +306,9 @@ const ProductPage = () => {
                       </div>
                     </div>
                   ))}
-                {filteredProducts.length === 0 && <h3>No item found.</h3>}
+                {!isLoading && filteredProducts.length === 0 && (
+                  <h3>No item found.</h3>
+                )}
               </div>
             )}
           </div>

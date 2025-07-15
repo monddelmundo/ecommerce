@@ -1,13 +1,20 @@
 import { Product } from "../products/page";
+import { Filters } from "../store/productSlice";
 
-export const fetchProducts = async (searchTxt: string) => {
-  console.log("test", searchTxt);
-  const filters = searchTxt
-    ? `filters[$or][0][title][$containsi]=${searchTxt}&filters[$or][1][description][$containsi]=${searchTxt}`
-    : "";
+export const fetchProducts = async (filters: Filters) => {
+  let finalFilters = "";
+  if (filters.searchTxt)
+    finalFilters += `filters[$or][0][title][$containsi]=${filters.searchTxt}&filters[$or][1][description][$containsi]=${filters.searchTxt}&`;
+
+  if (filters.category)
+    finalFilters += `filters[category][$eqi]=${filters.category}&`;
+
+  if (filters.rating) finalFilters += `filters[rate][$gte]=${filters.rating}&`;
+  if (filters.minPrice && filters.maxPrice)
+    finalFilters += `filters[$and][0][price][$gte]=${filters.minPrice}&filters[$and][1][price][$lte]=${filters.maxPrice}&`;
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/products?populate=*${
-      filters ? `&${filters}` : ""
+      finalFilters ? `&${finalFilters}` : ""
     }`
   );
   if (!res.ok) throw new Error("Failed to fetch");
@@ -18,4 +25,12 @@ export const fetchProducts = async (searchTxt: string) => {
       rating: { rate: item.rate, count: item.count },
     })
   );
+};
+
+export const fetchCategories = async () => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/products/unique-categories`
+  );
+  const products = await res.json();
+  return products;
 };

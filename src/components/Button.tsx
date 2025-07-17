@@ -4,6 +4,7 @@ interface Props {
   onClick?: () => void;
   type?: "submit" | "reset" | "button" | undefined;
   className?: string;
+  noMargin?: boolean;
 }
 
 const Button: React.FC<Props> = ({
@@ -12,6 +13,7 @@ const Button: React.FC<Props> = ({
   className,
   type,
   isLoading,
+  noMargin = false,
 }) => {
   return (
     <button
@@ -20,7 +22,9 @@ const Button: React.FC<Props> = ({
       className={
         className
           ? className
-          : `flex items-center justify-center cursor-pointer mt-4 bg-[#071108] text-white px-4 py-2 rounded hover:bg-[#B5BEC6] hover:text-[#071108]`
+          : `flex items-center justify-center cursor-pointer ${
+              noMargin ? "" : "mt-4"
+            } bg-[#071108] text-white px-4 py-2 rounded hover:bg-[#B5BEC6] hover:text-[#071108]`
       }
     >
       {isLoading && (

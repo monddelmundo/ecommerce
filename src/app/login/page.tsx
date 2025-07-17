@@ -26,14 +26,12 @@ export default function LoginPage() {
       console.log("User Logged in successfully!:", data);
       dispatch(
         setUser({
-          emailAddress: data.user.email,
-          firstName: data.user.firstName,
-          lastName: data.user.lastName,
-          profilePhoto: data.user?.profilePhoto,
-          documentId: data.user.documentId,
+          ...data.user,
+          profilePhoto: `${process.env.NEXT_PUBLIC_UPLOADS_URL}${data.user.profilePhoto?.url}`,
         })
       );
       router.push("/products");
+      window.location.reload();
     },
     onError: (error) => {
       toast.error("Invalid email/password!");

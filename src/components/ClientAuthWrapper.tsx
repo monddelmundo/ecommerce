@@ -7,17 +7,19 @@ import { setUser } from "../app/store/userSlice";
 
 export default function ClientAuthWrapper() {
   const dispatch = useDispatch();
-  const pathname = usePathname();
-  const router = useRouter();
-
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me`, {
+    fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/me?populate=*`, {
       credentials: "include",
     })
       .then((res) => (res.ok ? res.json() : null))
       .then((user) => {
         if (user) {
-          dispatch(setUser(user));
+          dispatch(
+            setUser({
+              ...user,
+              profilePhoto: `${process.env.NEXT_PUBLIC_UPLOADS_URL}${user.profilePhoto?.url}`,
+            })
+          );
           //   if (pathname === "/login") router.push("/products");
         }
       });

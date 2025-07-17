@@ -20,15 +20,11 @@ import {
   clearFilters,
   selectCategory,
   selectRating,
-  setFilters,
   setMaxPrice,
   setMinPrice,
   setProducts,
 } from "../store/productSlice";
-import {
-  addItemAndSyncCart,
-  useCreateCartItemMutation,
-} from "../api/cartProducts";
+import { addItemAndSyncCart } from "../api/cartProducts";
 import { useAppDispatch } from "../hooks";
 import { ActionCreatorWithPayload } from "@reduxjs/toolkit";
 

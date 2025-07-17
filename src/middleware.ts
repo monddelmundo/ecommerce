@@ -8,8 +8,17 @@ export function middleware(request: NextRequest) {
   const isAuthenticated = !!token;
   const protectedPaths = ["/login", "/register"]; // Routes to protect from authenticated users
 
+  const protectedForUnauthenticated = ["/checkout", "/payment", "/profile"];
+
   if (isAuthenticated && protectedPaths.includes(request.nextUrl.pathname)) {
     return NextResponse.redirect(new URL("/products", request.url));
+  }
+
+  if (
+    !isAuthenticated &&
+    protectedForUnauthenticated.includes(request.nextUrl.pathname)
+  ) {
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   return NextResponse.next();
@@ -17,5 +26,5 @@ export function middleware(request: NextRequest) {
 
 // Apply only to the routes we want to check
 export const config = {
-  matcher: ["/login", "/register"],
+  matcher: ["/login", "/register", "/checkout", "/payment", "/profile"],
 };

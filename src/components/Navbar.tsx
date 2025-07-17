@@ -31,7 +31,12 @@ const Navbar: React.FC = () => {
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
-  const { data: items, isSuccess, error, isLoading } = useGetCartQuery();
+  const {
+    data: items,
+    isSuccess,
+    error,
+    isLoading,
+  } = useGetCartQuery(undefined, { skip: !userDetails.user });
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -51,6 +56,8 @@ const Navbar: React.FC = () => {
     onSuccess: (data) => {
       console.log("User Logged out successfully!:", data);
       dispatch(setUser(null));
+      router.push("/products");
+      window.location.reload();
     },
     onError: (error) => {
       toast.error("Failed to logout" + error);
@@ -69,7 +76,12 @@ const Navbar: React.FC = () => {
     <nav className="bg-[#071108] shadow px-6 py-3 flex items-center justify-between">
       {isOpen && <ViewCartPopup onClose={() => setIsOpen(false)} />}
       {/* Logo */}
-      <div className="text-xl font-bold text-[#C7DBE6]">Chelle's Store</div>
+      <div
+        className="text-xl font-bold text-[#C7DBE6] cursor-pointer"
+        onClick={() => router.push("/products")}
+      >
+        Chelle's Store
+      </div>
 
       {/* Search Bar */}
       <div className="flex items-center gap-2 w-full max-w-md">
@@ -113,7 +125,9 @@ const Navbar: React.FC = () => {
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 transformOrigin={{ vertical: "top", horizontal: "right" }}
               >
-                <MenuItem onClick={handleClose}>Profile</MenuItem>
+                <MenuItem onClick={() => router.push("/profile")}>
+                  Profile
+                </MenuItem>
                 <MenuItem onClick={handleClose}>Orders</MenuItem>
                 <MenuItem onClick={() => logoutMutation.mutate()}>
                   Logout

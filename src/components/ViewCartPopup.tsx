@@ -5,6 +5,8 @@ import { useState } from "react";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AddIcon from "@mui/icons-material/Add";
 import Button from "./Button";
+import { toast } from "react-toastify";
+import { useRouter } from "next/navigation";
 import {
   addQty,
   checkUncheck,
@@ -31,6 +33,7 @@ const ADD = "ADD";
 const ViewCartPopup: React.FC<Props> = ({ onClose }) => {
   const dispatch = useDispatch();
   const appDispatch = useAppDispatch();
+  const router = useRouter();
   const cartItems = useSelector((state: RootState) => state.cart.items);
   const [selectAll, setSelectAll] = useState(false);
   console.log(cartItems);
@@ -62,7 +65,15 @@ const ViewCartPopup: React.FC<Props> = ({ onClose }) => {
     setSelectAll(e.target.checked);
   };
 
-  const handleCheckout = () => {};
+  const handleCheckout = () => {
+    const checkedItems = cartItems.filter(item => item.isChecked);
+    if (checkedItems.length === 0) {
+      toast.error("Please select items to checkout");
+      return;
+    }
+    onClose();
+    router.push("/checkout");
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">

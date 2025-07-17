@@ -120,26 +120,28 @@ export const updateItemAndSyncCart = createAsyncThunk(
     if (payload.quantity === 0) dispatch(removeFromCart(payload.product.id));
     else dispatch(updateCartItem(payload));
 
-    const item = payload;
-    const existing = cartItems.find((i) => i.product.id === item.product.id);
-    try {
-      if (existing) {
-        if (payload.quantity === 0) {
-          await dispatch(
-            cartApi.endpoints.removeCartItem.initiate({
-              cartProduct: { ...item },
-            })
-          ).unwrap();
-        } else {
-          await dispatch(
-            cartApi.endpoints.updateCartItem.initiate({
-              cartProduct: { ...item },
-            })
-          ).unwrap();
+    if (state.user.user) {
+      const item = payload;
+      const existing = cartItems.find((i) => i.product.id === item.product.id);
+      try {
+        if (existing) {
+          if (payload.quantity === 0) {
+            await dispatch(
+              cartApi.endpoints.removeCartItem.initiate({
+                cartProduct: { ...item },
+              })
+            ).unwrap();
+          } else {
+            await dispatch(
+              cartApi.endpoints.updateCartItem.initiate({
+                cartProduct: { ...item },
+              })
+            ).unwrap();
+          }
         }
+      } catch (error) {
+        console.error(error);
       }
-    } catch (error) {
-      console.error(error);
     }
   }
 );

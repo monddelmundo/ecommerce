@@ -49,8 +49,8 @@ export type CartProduct = {
   quantity: number;
   product: Product;
   isChecked: boolean;
-  documentId: string;
-  updatedAt: Date;
+  documentId?: string;
+  updatedAt?: Date;
   // @TODO: Add delisted value
 };
 
@@ -111,6 +111,8 @@ const ProductPage = () => {
         await appDispatch(
           addItemAndSyncCart({ quantity: 1, isChecked: true, product })
         );
+      } else {
+        await dispatch(addToCart({ quantity: 1, isChecked: true, product }));
       }
       toast.success("Item added to cart.");
     } catch (error) {

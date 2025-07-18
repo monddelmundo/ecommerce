@@ -44,9 +44,9 @@ const Navbar: React.FC = () => {
     setAnchorEl(event.currentTarget);
   };
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setAnchorEl(null);
-  };
+  }, []);
 
   useEffect(() => {
     if (isSuccess && items) {

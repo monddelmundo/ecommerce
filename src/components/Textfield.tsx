@@ -28,7 +28,6 @@ const BasicTextField: React.FC<props> = ({
   required,
   handleChange,
 }) => {
-  console.log(id);
   return (
     <TextField
       size="small"

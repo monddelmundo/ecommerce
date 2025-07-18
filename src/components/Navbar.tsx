@@ -40,9 +40,9 @@ const Navbar: React.FC = () => {
     error,
     isLoading,
   } = useGetCartQuery(undefined, { skip: !userDetails.user });
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+  const handleClick = useCallback((event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
-  };
+  }, []);
 
   const handleClose = useCallback(() => {
     setAnchorEl(null);

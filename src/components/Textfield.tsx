@@ -1,4 +1,5 @@
 import { SxProps, TextField, Theme } from "@mui/material";
+import React from "react";
 
 interface props {
   label: string;
@@ -27,6 +28,7 @@ const BasicTextField: React.FC<props> = ({
   required,
   handleChange,
 }) => {
+  console.log(id);
   return (
     <TextField
       size="small"
@@ -45,4 +47,4 @@ const BasicTextField: React.FC<props> = ({
   );
 };
 
-export default BasicTextField;
+export default React.memo(BasicTextField);

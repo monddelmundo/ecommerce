@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import SearchIcon from "@mui/icons-material/Search";
 import PersonIcon from "@mui/icons-material/Person";
 import BasicTextField from "./Textfield";
@@ -25,9 +25,12 @@ const Navbar: React.FC = () => {
   const dispatch = useDispatch();
   const cart = useSelector((state: RootState) => state.cart.items);
   const userDetails = useSelector((state: RootState) => state.user);
-  const handleSearchTextChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearch(e.target.value);
-  };
+  const handleSearchTextChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearch(e.target.value);
+    },
+    [search]
+  );
 
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -89,7 +92,7 @@ const Navbar: React.FC = () => {
         <BasicTextField
           id="find-text"
           value={search}
-          handleChange={(e) => handleSearchTextChange(e)}
+          handleChange={handleSearchTextChange}
           label=""
           className="w-full px-3 py-2 bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#364652]"
           placeholder="Find something"

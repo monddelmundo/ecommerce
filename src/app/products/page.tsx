@@ -1,6 +1,14 @@
 "use client";
 import ViewCartPopup from "@/components/ViewCartPopup";
-import { useState, useEffect, Dispatch, SetStateAction, useMemo } from "react";
+import {
+  useState,
+  useEffect,
+  Dispatch,
+  SetStateAction,
+  useMemo,
+  useCallback,
+  ChangeEvent,
+} from "react";
 import { fetchCategories, fetchProducts } from "../api/products";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "@/components/Loader";
@@ -102,8 +110,14 @@ const ProductPage = () => {
     } else return [];
   }, [filters, products, shouldApplyPriceFilters]);
 
-  const paginatedItems = filteredProducts.slice(startIndex, endIndex);
-  const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+  const paginatedItems = useMemo(
+    () => filteredProducts.slice(startIndex, endIndex),
+    [filteredProducts, startIndex, endIndex]
+  );
+  const totalPages = useMemo(
+    () => Math.ceil(filteredProducts.length / itemsPerPage),
+    [filteredProducts.length, itemsPerPage]
+  );
 
   const handleAddToCart = async (product: Product) => {
     try {
@@ -120,27 +134,40 @@ const ProductPage = () => {
     }
   };
 
-  const handleClickCategoryItem = (category: string) => {
+  const handleClickCategoryItem = useCallback((category: string) => {
     if (category === filters.category) dispatch(selectCategory(""));
     else dispatch(selectCategory(category));
     setCurrentPage(1);
-  };
+  }, []);
 
-  const handleRatingItemClick = (rating: number) => {
+  const handleRatingItemClick = useCallback((rating: number) => {
     dispatch(selectRating(rating));
     setCurrentPage(1);
-  };
+  }, []);
 
-  const handleChange = (
-    value: string,
-    setter: ActionCreatorWithPayload<string>
-  ) => {
-    const numeric = value.replace(/\D/g, ""); // Remove non-digits
-    dispatch(setter(numeric));
-    setCurrentPage(1);
+  const handleMinPriceChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const numeric = e.target.value.replace(/\D/g, ""); // Remove non-digits
+      dispatch(setMinPrice(numeric));
+      setCurrentPage(1);
 
-    if (filters.minPrice && filters.maxPrice) setShouldApplyPriceFilters(true);
-  };
+      if (filters.minPrice && filters.maxPrice)
+        setShouldApplyPriceFilters(true);
+    },
+    []
+  );
+
+  const handleMaxPriceChange = useCallback(
+    (e: ChangeEvent<HTMLInputElement>) => {
+      const numeric = e.target.value.replace(/\D/g, ""); // Remove non-digits
+      dispatch(setMaxPrice(numeric));
+      setCurrentPage(1);
+
+      if (filters.minPrice && filters.maxPrice)
+        setShouldApplyPriceFilters(true);
+    },
+    []
+  );
 
   const handleClearFilters = () => {
     dispatch(clearFilters());
@@ -192,9 +219,7 @@ const ProductPage = () => {
                 <BasicTextField
                   id="min-text"
                   label=""
-                  handleChange={(e) =>
-                    handleChange(e.target.value, setMinPrice)
-                  }
+                  handleChange={handleMinPriceChange}
                   value={filters.minPrice}
                   placeholder="MIN"
                   className="mr-1 w-25"
@@ -203,9 +228,7 @@ const ProductPage = () => {
                 <BasicTextField
                   id="min-text"
                   label=""
-                  handleChange={(e) =>
-                    handleChange(e.target.value, setMaxPrice)
-                  }
+                  handleChange={handleMaxPriceChange}
                   value={filters.maxPrice}
                   placeholder="MAX"
                   className="ml-1 w-25"
